@@ -1,0 +1,22 @@
+import pandas as pd
+ratings = pd.read_csv('E:/Study/Machine Learning, Data Science and Deep Learning with Python/ml-latest-small/ratings.csv')
+movies = pd.read_csv('E:/Study/Machine Learning, Data Science and Deep Learning with Python/ml-latest-small/movies.csv')
+ratings=ratings.drop('timestamp',axis=1)
+movies=movies.drop('genres',axis=1)
+ratings=pd.merge(ratings,movies)
+userratings=ratings.pivot_table(index='userId',columns='title',values='rating')
+corrmatrix=userratings.corr(method='pearson',min_periods=100)
+corrmatrix.head()
+myratings=userratings.loc[1].dropna()
+myratings
+simcandidate=pd.Series()
+for i in range(0,len(myratings.index)):
+    #print("add sims for"+myratings.index[i])
+    sims= corrmatrix[myratings.index[i]].dropna()
+    sims=sims.map(lambda x:x*myratings[i])
+    simcandidate=simcandidate.append(sims)
+simcandidate.sort_values(inplace=True,ascending=False)
+print(simcandidate)
+simcandidate=simcandidate.groupby(simcandidate.index).sum()
+simcandidate.sort_values(inplace=True,ascending=False)
+simcandidate
